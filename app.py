@@ -10,7 +10,7 @@ def get_llm():
 
     try:
         return Together(
-            model="togethercomputer/gpt-neo-2.7B",  # Use the correct model here
+            model="togethercomputer/llama-2-7b",  
             temperature=0.7,
             max_tokens=256,
             together_api_key=st.secrets["TOGETHER_API_KEY"]
@@ -18,6 +18,7 @@ def get_llm():
     except Exception as e:
         st.error(f"⚠️ Failed to initialize Together API: {str(e)}")
         raise e
+
 
 if "conversation" not in st.session_state:
     try:
