@@ -5,24 +5,20 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import traceback
-
-# --- LLM Setup for Together ---
 def get_llm():
     from langchain_community.llms import Together
 
     try:
-        # Replace with a valid model from the list of available models
         return Together(
-            model="togethercomputer/your-chosen-model",  # Replace with the correct model name
+            model="togethercomputer/gpt-neo-2.7B",  # Use the correct model here
             temperature=0.7,
             max_tokens=256,
-            together_api_key=st.secrets["TOGETHER_API_KEY"]  # Streamlit's secrets management
+            together_api_key=st.secrets["TOGETHER_API_KEY"]
         )
     except Exception as e:
         st.error(f"⚠️ Failed to initialize Together API: {str(e)}")
         raise e
 
-# --- Conversation Chain ---
 if "conversation" not in st.session_state:
     try:
         llm = get_llm()
