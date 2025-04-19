@@ -53,3 +53,17 @@ if user_input:
         st.markdown(f"**AI:** {response}")
     except Exception as e:
         # Log the error for debugging
+        st.error(f"❌ Error: {str(e)}")
+        # Capture full traceback for debugging
+        st.text(traceback.format_exc())
+        # Retry logic (if needed)
+        retries = 3
+        for i in range(retries):
+            try:
+                response = st.session_state.conversation.predict(input=user_input)
+                st.markdown(f"**AI (retry {i+1}):** {response}")
+                break
+            except Exception as retry_error:
+                st.error(f"❌ Retry {i+1} failed: {str(retry_error)}")
+                if i == retries - 1:
+                    st.error("⚠️ All retries failed.")
