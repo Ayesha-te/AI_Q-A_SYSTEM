@@ -4,25 +4,43 @@ from langchain.llms import OpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
-# Load OpenAI API key securely from secrets
+# Load OpenAI API key securely
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["apikey"]
 
-# Set up LLM with memory
+# Initialize memory
+if "memory" not in st.session_state:
+    st.session_state.memory = ConversationBufferMemory()
+
+# Initialize conversation chain
 llm = OpenAI(temperature=0.7)
-memory = ConversationBufferMemory()
-conversation = ConversationChain(llm=llm, memory=memory, verbose=True)
+conversation = ConversationChain(
+    llm=llm, 
+    memory=st.session_state.memory,
+    verbose=False
+)
 
 # Streamlit UI
-st.title("🧠 AI-Powered Q&A System")
-st.write("Ask me anything, and I'll try to help!")
+st.title("💬 AI-Powered Q&A Chatbot")
+st.write("Talk to me like you would in a conversation!")
 
-# Input field
-user_input = st.text_input("Your question")
+# Initialize chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-# When user enters a question
+# Input box
+user_input = st.text_input("You:", key="input")
+
 if user_input:
+    # Get response from LLM
     response = conversation.run(user_input)
-    st.write("🤖", response)
+    
+    # Update chat history
+    st.session_state.chat_history.append(("You", user_input))
+    st.session_state.chat_history.append(("AI", response))
 
-    with st.expander("🧾 Conversation History"):
-        st.info(memory.buffer)
+# Display conversation history
+for sender, message in st.session_state.chat_history:
+    if sender == "You":
+        st.markdown(f"**🧑‍💻 {sender}:** {message}")
+    else:
+        st.markdown(f"**🤖 {sender}:** {message}")
