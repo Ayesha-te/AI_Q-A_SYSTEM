@@ -21,8 +21,7 @@ conversation = ConversationChain(
 
 # Streamlit UI
 st.title("💬 AI-Powered Q&A Chatbot")
-st.write("Talk to me like you would in a conversation!")
-
+st.write("Ask me anything <3")
 # Initialize chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
