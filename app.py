@@ -4,13 +4,14 @@ from langchain.llms import OpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
-
+# Load OpenAI API key securely
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["apikey"]
 
-
+# Initialize memory (if not already initialized)
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory()
 
+# Initialize conversation chain with the OpenAI LLM
 llm = OpenAI(temperature=0.7)
 conversation = ConversationChain(
     llm=llm, 
@@ -43,3 +44,4 @@ for sender, message in st.session_state.chat_history:
         st.markdown(f"**🧑‍💻 {sender}:** {message}")
     else:
         st.markdown(f"**🤖 {sender}:** {message}")
+
