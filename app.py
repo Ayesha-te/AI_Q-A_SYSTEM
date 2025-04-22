@@ -4,10 +4,9 @@ from langchain.llms import OpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
-# Load OpenAI API key securely from Streamlit secrets
+
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["apikey"]
 
-# Initialize memory if not already done (for conversation context)
 if "memory" not in st.session_state:
     st.session_state.memory = ConversationBufferMemory()
 
