@@ -4,16 +4,20 @@ import toml
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-
 os.environ['OPENAI_API_KEY'] = st.secrets["openai"]["apikey"]
 
-# App config
-st.set_page_config(page_title="AI Q&A System")
-st.title("🤖 AI-Powered Q&A with Memory")
 
-# Initialize memory
+
+# Streamlit setup
+st.set_page_config(page_title="AI Q&A")
+st.title("🤖 AI-Powered Q&A System with Memory")
+
+# Initialize memory safely
 if "memory" not in st.session_state:
-    st.session_state.memory = ConversationBufferMemory(return_messages=True)
+    memory = ConversationBufferMemory(return_messages=True)
+    st.session_state.memory = memory
+else:
+    memory = st.session_state.memory
 
 # Initialize LLM
 llm = ChatOpenAI(
@@ -22,32 +26,30 @@ llm = ChatOpenAI(
     openai_api_key=openai_api_key
 )
 
-# Set up conversation chain
-conversation = ConversationChain(
+# Set up the conversation chain
+qa_chain = ConversationChain(
     llm=llm,
-    memory=st.session_state.memory,
+    memory=memory,
     verbose=False
 )
 
-# UI - Question Input
-with st.form("chat_form", clear_on_submit=True):
-    user_input = st.text_input("Type your question:", placeholder="Ask me anything...")
+# Input form
+with st.form("user_input_form", clear_on_submit=True):
+    user_input = st.text_input("Ask a question:", placeholder="Type here...")
     submitted = st.form_submit_button("Send")
 
+# If question submitted
 if submitted and user_input:
-    response = conversation.predict(input=user_input)
-    st.write("🧠 **AI Response:**", response)
+    response = qa_chain.predict(input=user_input)
+    st.write("🧠 **AI:**", response)
 
-# Show full conversation history
-with st.expander("📜 Chat History"):
-    for msg in st.session_state.memory.chat_memory.messages:
-        if msg.type == "human":
-            st.markdown(f"🧍 **You**: {msg.content}")
-        else:
-            st.markdown(f"🤖 **AI**: {msg.content}")
+# Show memory / chat history
+with st.expander("💬 Conversation History"):
+    for msg in memory.chat_memory.messages:
+        role = "You" if msg.type == "human" else "AI"
+        st.markdown(f"**{role}:** {msg.content}")
 
-# Optional: Reset button
-if st.button("🔄 Reset Chat"):
-    st.session_state.memory.clear()
+# Optional reset button
+if st.button("🔁 Reset Conversation"):
+    memory.clear()
     st.experimental_rerun()
-
