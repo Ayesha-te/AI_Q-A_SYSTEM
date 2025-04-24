@@ -1,47 +1,37 @@
-import os
+
 import streamlit as st
-from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
+from langchain.schema import AIMessage, HumanMessage
+import toml
 
+# Load OpenAI API Key
+secrets = toml.load("secrets.toml")
+openai_api_key = secrets["openai"]["api_key"]
 
-os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["apikey"]
+# Streamlit UI
+st.set_page_config(page_title="AI Q&A System")
+st.title("🤖 AI-Powered Q&A System with Memory")
 
+# Set up session state for memory
 if "memory" not in st.session_state:
-    st.session_state.memory = ConversationBufferMemory()
+    st.session_state.memory = ConversationBufferMemory(return_messages=True)
 
-# Initialize the OpenAI LLM with a temperature setting
-llm = OpenAI(temperature=0.7)
+# Initialize LLM with memory
+llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key)
+conversation = ConversationChain(llm=llm, memory=st.session_state.memory, verbose=False)
 
-# Set up the conversation chain (using the LLM and memory)
-conversation = ConversationChain(
-    llm=llm, 
-    memory=st.session_state.memory,
-    verbose=False
-)
+# Input from user
+user_input = st.text_input("Ask a question:")
 
-# Streamlit UI setup
-st.title("💬 AI-Powered Q&A Chatbot")
-st.write("Ask me anything <3")
-
-# Initialize chat history if not already done
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-# Input box for user query
-user_input = st.text_input("You:", key="input")
-
+# Handle input and output
 if user_input:
-    # Get response from the conversation chain (AI response)
-    response = conversation.run(user_input)
-    
-    # Update chat history for display
-    st.session_state.chat_history.append(("You", user_input))
-    st.session_state.chat_history.append(("AI", response))
+    response = conversation.predict(input=user_input)
+    st.write("🧠 AI:", response)
 
-# Display the conversation history
-for sender, message in st.session_state.chat_history:
-    if sender == "You":
-        st.markdown(f"**🧑‍💻 {sender}:** {message}")
-    else:
-        st.markdown(f"**🤖 {sender}:** {message}")
+    # Show conversation history
+    with st.expander("💬 Conversation History"):
+        for msg in st.session_state.memory.chat_memory.messages:
+            role = "You" if isinstance(msg, HumanMessage) else "AI"
+            st.markdown(f"**{role}:** {msg.content}")
