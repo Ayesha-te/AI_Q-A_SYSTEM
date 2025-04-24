@@ -3,7 +3,9 @@ import openai
 import toml
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationalChain
+from langchain.chains import ConversationChain
+
+
 
 # Load OpenAI API key from secrets.toml
 secrets = toml.load("secrets.toml")
