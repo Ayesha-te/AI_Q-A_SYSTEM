@@ -9,8 +9,12 @@ from langchain.chains import ConversationChain
 os.environ['OPENAI_API_KEY'] = st.secrets["openai"]["apikey"]
 
 # Initialize LangChain LLM and memory
-llm = OpenAI(model="text-davinci-003")  # You can choose a different model if needed
+llm = OpenAI(
+model="gpt-3.5-turbo",
+temperature=0.7,
+openai_api_key=openai_api_key,
 memory = ConversationBufferMemory()
+)
 
 # Create a conversational chain
 qa_chain = ConversationChain(llm=llm, memory=memory)  # Use ConversationChain
