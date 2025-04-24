@@ -1,37 +1,33 @@
-
 import streamlit as st
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain.schema import AIMessage, HumanMessage
+import openai
 import toml
+from langchain.llms import OpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalChain
 
-# Load OpenAI API Key
+# Load OpenAI API key from secrets.toml
 secrets = toml.load("secrets.toml")
-openai_api_key = secrets["openai"]["api_key"]
+openai.api_key = secrets["openai"]["api_key"]
+
+# Initialize LangChain LLM and memory
+llm = OpenAI(model="text-davinci-003")  # You can choose a different model if needed
+memory = ConversationBufferMemory()
+
+# Create a conversational chain
+qa_chain = ConversationalChain(llm=llm, memory=memory)
 
 # Streamlit UI
-st.set_page_config(page_title="AI Q&A System")
-st.title("🤖 AI-Powered Q&A System with Memory")
+st.title("AI-Powered Q&A System")
+st.write("Ask me anything!")
 
-# Set up session state for memory
-if "memory" not in st.session_state:
-    st.session_state.memory = ConversationBufferMemory(return_messages=True)
+# Input for user query
+user_input = st.text_input("Your Question:")
 
-# Initialize LLM with memory
-llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key)
-conversation = ConversationChain(llm=llm, memory=st.session_state.memory, verbose=False)
-
-# Input from user
-user_input = st.text_input("Ask a question:")
-
-# Handle input and output
 if user_input:
-    response = conversation.predict(input=user_input)
-    st.write("🧠 AI:", response)
+    # Get the AI-generated response
+    response = qa_chain.run(user_input)
+    
+    # Display the response
+    st.write("AI Response:")
+    st.write(response)
 
-    # Show conversation history
-    with st.expander("💬 Conversation History"):
-        for msg in st.session_state.memory.chat_memory.messages:
-            role = "You" if isinstance(msg, HumanMessage) else "AI"
-            st.markdown(f"**{role}:** {msg.content}")
