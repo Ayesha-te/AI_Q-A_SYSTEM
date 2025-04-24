@@ -23,7 +23,7 @@ else:
 llm = ChatOpenAI(
     model_name="gpt-3.5-turbo",
     temperature=0.7,
-    openai_api_key=openai_api_key
+    
 )
 
 # Set up the conversation chain
