@@ -1,4 +1,5 @@
-langchain>=0.1.0
-openai>=1.0.0
-streamlit>=1.28.0
-toml>=0.10.2
+langchain
+langchain-community
+openai
+streamlit
+toml
