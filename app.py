@@ -12,11 +12,12 @@ os.environ['OPENAI_API_KEY'] = st.secrets["openai"]["apikey"]
 llm = OpenAI(
 model="gpt-3.5-turbo",
 temperature=0.7,
-memory = ConversationBufferMemory()
 )
-
-# Create a conversational chain
-qa_chain = ConversationChain(llm=llm, memory=memory)  # Use ConversationChain
+qa_chain = ConversationChain(
+    llm=llm,
+    memory=st.session_state.memory,
+    verbose=False
+)
 
 # Streamlit UI
 st.title("AI-Powered Q&A System")
