@@ -7,8 +7,7 @@ from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationChain  
 
-secrets = toml.load("secrets.toml")
-openai_api_key = secrets["openai"]["api_key"]
+os.environ['OPENAI_API_KEY'] = st.secrets["openai"]["apikey"]
 
 # Initialize LangChain LLM and memory
 llm = OpenAI(model="text-davinci-003")  # You can choose a different model if needed
