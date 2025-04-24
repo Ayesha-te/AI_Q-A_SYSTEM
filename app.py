@@ -1,35 +1,53 @@
 import os
 import streamlit as st
-import openai
 import toml
-from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain  
 
 os.environ['OPENAI_API_KEY'] = st.secrets["openai"]["apikey"]
 
-# Initialize LangChain LLM and memory
-llm = OpenAI(
-model="gpt-3.5-turbo",
-temperature=0.7,
+# App config
+st.set_page_config(page_title="AI Q&A System")
+st.title("🤖 AI-Powered Q&A with Memory")
+
+# Initialize memory
+if "memory" not in st.session_state:
+    st.session_state.memory = ConversationBufferMemory(return_messages=True)
+
+# Initialize LLM
+llm = ChatOpenAI(
+    model_name="gpt-3.5-turbo",
+    temperature=0.7,
+    openai_api_key=openai_api_key
 )
-qa_chain = ConversationChain(
+
+# Set up conversation chain
+conversation = ConversationChain(
     llm=llm,
     memory=st.session_state.memory,
     verbose=False
 )
 
-# Streamlit UI
-st.title("AI-Powered Q&A System")
-st.write("Ask me anything!")
+# UI - Question Input
+with st.form("chat_form", clear_on_submit=True):
+    user_input = st.text_input("Type your question:", placeholder="Ask me anything...")
+    submitted = st.form_submit_button("Send")
 
-# Input for user query
-user_input = st.text_input("Your Question:")
+if submitted and user_input:
+    response = conversation.predict(input=user_input)
+    st.write("🧠 **AI Response:**", response)
 
-if user_input:
-    # Get the AI-generated response
-    response = qa_chain.run(user_input)
-    
-    # Display the response
-    st.write("AI Response:")
-    st.write(response)
+# Show full conversation history
+with st.expander("📜 Chat History"):
+    for msg in st.session_state.memory.chat_memory.messages:
+        if msg.type == "human":
+            st.markdown(f"🧍 **You**: {msg.content}")
+        else:
+            st.markdown(f"🤖 **AI**: {msg.content}")
+
+# Optional: Reset button
+if st.button("🔄 Reset Chat"):
+    st.session_state.memory.clear()
+    st.experimental_rerun()
+
