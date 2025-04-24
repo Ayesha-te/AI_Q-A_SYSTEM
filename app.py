@@ -12,7 +12,6 @@ os.environ['OPENAI_API_KEY'] = st.secrets["openai"]["apikey"]
 llm = OpenAI(
 model="gpt-3.5-turbo",
 temperature=0.7,
-openai_api_key=openai_api_key,
 memory = ConversationBufferMemory()
 )
 
